@@ -36,6 +36,10 @@ def get_date(media_item):
             latest_datetime = int(mktime(convert))
             return latest_datetime
 
+def check_db(title, datetime):
+    
+
+
 # connect to database and create cursor
 conn = sqlite3.connect('pm_scan.db')
 c = conn.cursor()
@@ -46,24 +50,23 @@ headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleW
 response = requests.get(url, headers=headers)
 soup = BeautifulSoup(response.text, "lxml")
 most_recent = soup.find("div", class_="media-item")
-testy = get_date(most_recent)
-print(testy)
-
-# get_date(most_recent)
-
+latest_title = get_title(most_recent)
+latest_datetime = get_date(most_recent)
 
 # check these details against latest record in database
-# c.execute('SELECT * FROM articles ORDER BY datetime DESC LIMIT 1')
-# record = c.fetchone()
-# if latest_title == record[0] and latest_datetime == record[1]:
-#    pass
-#     # next_recent = soup.findAllNext('div', class='media-item')
-#     #write function for getting name and datetime of article
+c.execute('SELECT * FROM articles ORDER BY datetime DESC LIMIT 1')
+record = c.fetchone()
+if latest_title == record[0] and latest_datetime == record[1]:
+    next_recent = soup.findAllNext('div', class='media-item')
+
+else:
+    c.execute("INSERT INTO articles VALUES (?, ?)", (latest_title, latest_datetime))
+    conn.commit()
+    conn.close()
+    print('table updated')
 
 
-# else:
-#     c.execute("INSERT INTO articles VALUES (?, ?)", (latest_title, latest_datetime))
-#     conn.commit()
+
 
 
 
