@@ -15,6 +15,7 @@ import time
 from time import mktime
 from datetime import datetime
 from bs4 import BeautifulSoup
+    
 
 def get_title(media_item):
     # iterate through child elements of media item to get title
@@ -37,59 +38,67 @@ def get_date(media_item):
             return latest_datetime
 
 def check_db(title, datetime):
-    
+    c.execute('SELECT * FROM articles ORDER BY datetime DESC LIMIT 1')
+    record = c.fetchone()
+    if title == record[0] and datetime == record[1]:
+        print('no update made')
+        print(title + ' // ' + str(datetime))
+        return False 
+    else:
+        c.execute("INSERT INTO articles VALUES (?, ?)", (latest_title, latest_datetime))
+        conn.commit()
+        # conn.close()
+        print('table updated: ' + latest_title + ' @ ' + str(latest_datetime))
+        return True        
 
 
-# connect to database and create cursor
-conn = sqlite3.connect('pm_scan.db')
+# connect to database
+conn = sqlite3.connect('pm_scan_v5.db')
 c = conn.cursor()
+# c.execute('''CREATE TABLE articles (article_name text, datetime integer)''')
+#insert intitial values into database
+c.execute("INSERT INTO articles VALUES('first article', 1537392583)")
+conn.commit()
 
-# open web page and get first media item
+
+# open web page 
 url = 'https://pm.gov.au/media'
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 response = requests.get(url, headers=headers)
+
+# parse HTML, get latest article, check against database
 soup = BeautifulSoup(response.text, "lxml")
-most_recent = soup.find("div", class_="media-item")
-latest_title = get_title(most_recent)
-latest_datetime = get_date(most_recent)
+latest = soup.find_all("div", class_="media-item")
+article_count = 0
+latest_title = get_title(latest[article_count])
+latest_datetime = get_date(latest[article_count])
+db = check_db(latest_title, latest_datetime)
 
-# check these details against latest record in database
-c.execute('SELECT * FROM articles ORDER BY datetime DESC LIMIT 1')
-record = c.fetchone()
-if latest_title == record[0] and latest_datetime == record[1]:
-    next_recent = soup.findAllNext('div', class='media-item')
+# if new article added to database, iterate through previous and keep adding to database until most recent entry reached 
+for i in range(9):
+    if db:
+        article_count += 1
+        latest_title = get_title(latest[article_count])
+        latest_datetime = get_date(latest[article_count])
+        db = check_db(latest_title, latest_datetime)
+    else:
+        break
 
-else:
-    c.execute("INSERT INTO articles VALUES (?, ?)", (latest_title, latest_datetime))
-    conn.commit()
-    conn.close()
-    print('table updated')
+# for item in next_latest:
+#     next_latest_title = get_title(next_latest)
+#     next_latest_datetime = get_date(next_latest)
+#     print(next_latest_title, next_latest_datetime)
 
-
-
-
-
-
-
-
-#iterate through results and check published date
-# for i in most_recent:
-#     date = i['content']
-#     print(date)
-#     format = '%Y-%m-%dT%H:%M:%S+10:00'
-#     convert = time.strptime(input, format)
-#     article_date = int(mktime(convert))
-#     dates = c.execute('SELECT datetime FROM articles ORDER BY datetime DESC LIMIT 1')
-#     latest_saved = int(c.fetchone()[0])
-#     if article_date > latest_saved:
+    # check_db(next_latest_title, next_latest_datetime)
+    # print('loop ran ' + str(article_count) + ' times')
         
-        
-        # c.execute("INSERT INTO articles VALUES('first article', 1537392583)")
 
 
 
 
-  
+
+    
+
 
 
         
