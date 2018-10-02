@@ -53,10 +53,10 @@ def check_db(title, datetime):
 
 
 # connect to database
-conn = sqlite3.connect('pm_scan_v7.db')
+conn = sqlite3.connect('pm_scan_v5.db')
 c = conn.cursor()
-c.execute('''CREATE TABLE articles (article_name text, datetime integer)''')
-# insert intitial values into database
+# c.execute('''CREATE TABLE articles (article_name text, datetime integer)''')
+#insert intitial values into database
 c.execute("INSERT INTO articles VALUES('first article', 1537392583)")
 conn.commit()
 
@@ -70,14 +70,17 @@ response = requests.get(url, headers=headers)
 soup = BeautifulSoup(response.text, "lxml")
 latest = soup.find_all("div", class_="media-item")
 article_count = 0
+latest_title = get_title(latest[article_count])
+latest_datetime = get_date(latest[article_count])
+db = check_db(latest_title, latest_datetime)
 
-# iterate through the nine articles on the front page, check each against database
+# if new article added to database, iterate through previous and keep adding to database until most recent entry reached 
 for i in range(9):
-    latest_title = get_title(latest[article_count])
-    latest_datetime = get_date(latest[article_count])
-    db = check_db(latest_title, latest_datetime)
     if db:
         article_count += 1
+        latest_title = get_title(latest[article_count])
+        latest_datetime = get_date(latest[article_count])
+        db = check_db(latest_title, latest_datetime)
     else:
         break
 
