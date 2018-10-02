@@ -53,37 +53,33 @@ def check_db(title, datetime):
 
 
 # connect to database
-conn = sqlite3.connect('pm_scan_v12.db')
+conn = sqlite3.connect('pm_scan_v7.db')
 c = conn.cursor()
 c.execute('''CREATE TABLE articles (article_name text, datetime integer)''')
 # insert intitial values into database
 c.execute("INSERT INTO articles VALUES('first article', 1537392583)")
 conn.commit()
 
+
+# open web page 
 url = 'https://pm.gov.au/media'
-url_count = 0
-while url_count <= 10: # <<< find a more elegant way to do this
-    # open web page 
-    url = url + '?page=' + str(url_count)
-    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
-    response = requests.get(url, headers=headers)
+headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+response = requests.get(url, headers=headers)
 
-    # parse HTML, get latest article, check against database
-    soup = BeautifulSoup(response.text, "lxml")
-    latest = soup.find_all("div", class_="media-item")
-    article_count = 0
+# parse HTML, get latest article, check against database
+soup = BeautifulSoup(response.text, "lxml")
+latest = soup.find_all("div", class_="media-item")
+article_count = 0
 
-    # iterate through the nine articles on the front page, check each against database
-    for i in range(9):
-        latest_title = get_title(latest[article_count])
-        latest_datetime = get_date(latest[article_count])
-        db = check_db(latest_title, latest_datetime)
-        if db:
-            article_count += 1
-        # else:
-        #     break
-    
-    url_count += 1
+# iterate through the nine articles on the front page, check each against database
+for i in range(9):
+    latest_title = get_title(latest[article_count])
+    latest_datetime = get_date(latest[article_count])
+    db = check_db(latest_title, latest_datetime)
+    if db:
+        article_count += 1
+    else:
+        break
 
 # for item in next_latest:
 #     next_latest_title = get_title(next_latest)
