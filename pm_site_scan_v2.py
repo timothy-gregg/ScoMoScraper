@@ -55,6 +55,7 @@ def check_db(title, datetime):
 # connect to database
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 conn = sqlite3.connect('pm_scan_v5.db')
 =======
 conn = sqlite3.connect('pm_scan_v12.db')
@@ -62,14 +63,22 @@ conn = sqlite3.connect('pm_scan_v12.db')
 =======
 conn = sqlite3.connect('pm_scan_v7.db')
 >>>>>>> parent of 347a938... Revert "Tweak for loop"
+=======
+conn = sqlite3.connect('pm_scan_v7.db')
+>>>>>>> parent of 2183619... Attempt to iterate through multiple pages
 c = conn.cursor()
 c.execute('''CREATE TABLE articles (article_name text, datetime integer)''')
 # insert intitial values into database
 c.execute("INSERT INTO articles VALUES('first article', 1537392583)")
 conn.commit()
 
+
+# open web page 
 url = 'https://pm.gov.au/media'
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> parent of 2183619... Attempt to iterate through multiple pages
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 response = requests.get(url, headers=headers)
 
@@ -87,6 +96,7 @@ for i in range(9):
         article_count += 1
     else:
         break
+<<<<<<< HEAD
 url_count = 0
 while url_count <= 10: # <<< find a more elegant way to do this
     # open web page 
@@ -111,6 +121,8 @@ while url_count <= 10: # <<< find a more elegant way to do this
     
     url_count += 1
 >>>>>>> parent of ed50ad3... Revert "Attempt to iterate through multiple pages"
+=======
+>>>>>>> parent of 2183619... Attempt to iterate through multiple pages
 
 # for item in next_latest:
 #     next_latest_title = get_title(next_latest)
