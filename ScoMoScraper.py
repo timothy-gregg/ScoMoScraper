@@ -13,10 +13,18 @@ def get_title(media_item):
     for child in children:
         if child.name == 'div' and child.get('class', '') == ['media-title']:
             latest_title = child.text
-            for a in child:
-                href = a.get('href') # FIGURE OUT what to do with this url
-                readPage(href)
             return latest_title
+
+
+def get_url(media_item):
+    children = media_item.descendants
+    for child in children:
+        if child.name == 'div' and child.get('class', '') == ['media-title']:
+            for a in child:
+                latest_url = a.get('href') 
+                return latest_url
+
+
 
 def get_date(media_item):
     # iterate through child elements of media item to get date
@@ -30,7 +38,7 @@ def get_date(media_item):
             latest_datetime = int(mktime(convert))
             return latest_datetime
 
-def check_db(title, datetime):
+def check_db(title, datetime, content):
     c.execute('SELECT * FROM articles ORDER BY datetime DESC LIMIT 1')
     record = c.fetchone()
     if title == record[0] and datetime == record[1]:
@@ -38,14 +46,14 @@ def check_db(title, datetime):
         print(title + ' // ' + str(datetime))
         return False 
     else:
-        c.execute("INSERT INTO articles VALUES (?, ?, ?)", (latest_title, latest_datetime, 'lorem ipsum'))
+        c.execute("INSERT INTO articles VALUES (?, ?, ?)", (title, datetime, content))
         conn.commit()
         # conn.close()
         print('table updated: ' + latest_title + ' @ ' + str(latest_datetime))
         return True        
 
 
-def readPage(href):
+def read_page(href):
     url = 'https://pm.gov.au' + href
     # headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
     response = requests.get(url, headers=headers)
@@ -60,7 +68,7 @@ def readPage(href):
 timeNow = time.time()
 
 #create new database
-conn = sqlite3.connect('ScoMoScraper_' + str(timeNow) + '.db')
+conn = sqlite3.connect('ScoMoScraper_v1.db')
 c = conn.cursor()
 # TO DO: conditional logic, create table if no table else pass
 c.execute('''CREATE TABLE articles (article_name text, datetime integer, article_content text)''')
@@ -84,8 +92,9 @@ article_count = 0
 for i in range(9):
     latest_title = get_title(latest[article_count])
     latest_datetime = get_date(latest[article_count])
-    # get_content(latest[article_count])
-    db = check_db(latest_title, latest_datetime)
+    latest_content = read_page(get_url(latest[article_count]))
+
+    db = check_db(latest_title, latest_datetime, latest_content)
     if db:
         article_count += 1
     else:
