@@ -1,13 +1,3 @@
-# NOTES AND STUFF>>>>>>>>
-# >>>>>>>>>>>>>>>>>>>>>>>>
-# ONLY NEEDED ONCE: 
-# c.execute('''CREATE TABLE articles (article_name text, datetime integer)''')
-# #insert intitial values into database
-# c.execute("INSERT INTO articles VALUES('first article', 1537392583)")
-# conn.commit()
-# >>>>>>>>>>>>>>>>>>>>>>>>
-# >>>>>>>>>>>>>>>>>>>>>>>>>>
-
 import sqlite3
 import requests
 import re
@@ -23,6 +13,9 @@ def get_title(media_item):
     for child in children:
         if child.name == 'div' and child.get('class', '') == ['media-title']:
             latest_title = child.text
+            for a in child:
+                href = a.get('href') # FIGURE OUT what to do with this url
+                readPage(href)
             return latest_title
 
 def get_date(media_item):
@@ -45,40 +38,39 @@ def check_db(title, datetime):
         print(title + ' // ' + str(datetime))
         return False 
     else:
-        c.execute("INSERT INTO articles VALUES (?, ?)", (latest_title, latest_datetime))
+        c.execute("INSERT INTO articles VALUES (?, ?, ?)", (latest_title, latest_datetime, 'lorem ipsum'))
         conn.commit()
         # conn.close()
         print('table updated: ' + latest_title + ' @ ' + str(latest_datetime))
         return True        
 
 
-# connect to database
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-conn = sqlite3.connect('pm_scan_v5.db')
-=======
-conn = sqlite3.connect('pm_scan_v12.db')
->>>>>>> parent of ed50ad3... Revert "Attempt to iterate through multiple pages"
-=======
-conn = sqlite3.connect('pm_scan_v7.db')
->>>>>>> parent of 347a938... Revert "Tweak for loop"
-=======
-conn = sqlite3.connect('pm_scan_v7.db')
->>>>>>> parent of 2183619... Attempt to iterate through multiple pages
+def readPage(href):
+    url = 'https://pm.gov.au' + href
+    # headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+    response = requests.get(url, headers=headers)
+    soup = BeautifulSoup(response.text)
+    article = soup.find('article')
+    return article.text
+
+
+
+
+# TEMP ONLY: timestamp for database files
+timeNow = time.time()
+
+#create new database
+conn = sqlite3.connect('ScoMoScraper_' + str(timeNow) + '.db')
 c = conn.cursor()
-c.execute('''CREATE TABLE articles (article_name text, datetime integer)''')
-# insert intitial values into database
-c.execute("INSERT INTO articles VALUES('first article', 1537392583)")
+# TO DO: conditional logic, create table if no table else pass
+c.execute('''CREATE TABLE articles (article_name text, datetime integer, article_content text)''')
+# #insert intitial values into database
+c.execute("INSERT INTO articles VALUES('first article', 1537392583, 'lorem ipsum dolor sit amet')")
 conn.commit()
 
 
 # open web page 
 url = 'https://pm.gov.au/media'
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> parent of 2183619... Attempt to iterate through multiple pages
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
 response = requests.get(url, headers=headers)
 
@@ -87,75 +79,15 @@ soup = BeautifulSoup(response.text, "lxml")
 latest = soup.find_all("div", class_="media-item")
 article_count = 0
 
+
 # iterate through the nine articles on the front page, check each against database
 for i in range(9):
     latest_title = get_title(latest[article_count])
     latest_datetime = get_date(latest[article_count])
+    # get_content(latest[article_count])
     db = check_db(latest_title, latest_datetime)
     if db:
         article_count += 1
     else:
         break
-<<<<<<< HEAD
-url_count = 0
-while url_count <= 10: # <<< find a more elegant way to do this
-    # open web page 
-    url = url + '?page=' + str(url_count)
-    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
-    response = requests.get(url, headers=headers)
-
-    # parse HTML, get latest article, check against database
-    soup = BeautifulSoup(response.text, "lxml")
-    latest = soup.find_all("div", class_="media-item")
-    article_count = 0
-
-    # iterate through the nine articles on the front page, check each against database
-    for i in range(9):
-        latest_title = get_title(latest[article_count])
-        latest_datetime = get_date(latest[article_count])
-        db = check_db(latest_title, latest_datetime)
-        if db:
-            article_count += 1
-        # else:
-        #     break
-    
-    url_count += 1
->>>>>>> parent of ed50ad3... Revert "Attempt to iterate through multiple pages"
-=======
->>>>>>> parent of 2183619... Attempt to iterate through multiple pages
-
-# for item in next_latest:
-#     next_latest_title = get_title(next_latest)
-#     next_latest_datetime = get_date(next_latest)
-#     print(next_latest_title, next_latest_datetime)
-
-    # check_db(next_latest_title, next_latest_datetime)
-    # print('loop ran ' + str(article_count) + ' times')
-        
-
-
-
-
-
-    
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
