@@ -55,9 +55,8 @@ def check_db(title, datetime, content):
 
 def read_page(href):
     url = 'https://pm.gov.au' + href
-    # headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
     response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.text)
+    soup = BeautifulSoup(response.text, "lxml")
     article = soup.find('article')
     return article.text
 
@@ -68,14 +67,21 @@ def read_page(href):
 timeNow = time.time()
 
 #create new database
-conn = sqlite3.connect('ScoMoScraper_v1.db')
+conn = sqlite3.connect('ScoMoScraper ' + str(timeNow) + '.db')
 c = conn.cursor()
-# TO DO: conditional logic, create table if no table else pass
+
+# TO DO: conditional logic, create table if no table else pass .......... if the table doesn't exist, Python will throw an exception and a new table will be created 
+
+# try:
+#     c.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="articles"')
+# except sqlite3.OperationalError:
+#     c.execute('''CREATE TABLE articles (article_name text, datetime integer, article_content text)''')
+
 c.execute('''CREATE TABLE articles (article_name text, datetime integer, article_content text)''')
+
 # #insert intitial values into database
 c.execute("INSERT INTO articles VALUES('first article', 1537392583, 'lorem ipsum dolor sit amet')")
 conn.commit()
-
 
 # open web page 
 url = 'https://pm.gov.au/media'
