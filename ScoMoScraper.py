@@ -59,25 +59,17 @@ def read_page(href):
     article = soup.find('article')
     return article.text
 
-
-# TEMP ONLY: timestamp for database files
-timeNow = time.time()
-
 #create new database
-conn = sqlite3.connect('ScoMoScraper ' + str(timeNow) + '.db')
+conn = sqlite3.connect('ScoMoScraper.db')
 c = conn.cursor()
 
-# ////////WORK IN PROGRESS///////////////
-# TO DO: conditional logic, create table if no table else pass .......... if the table doesn't exist, Python will throw an exception and a new table will be created 
-# try:
-#     c.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="articles"')
-# except sqlite3.OperationalError:
-#     c.execute('''CREATE TABLE articles (article_name text, datetime integer, article_content text)''')
-# /////////////////////////////////////
+# check if database table has already been created; if not, create it
+try:
+    c.execute('''CREATE TABLE articles (article_name text, datetime integer, article_content text)''')
+except:
+    pass
 
-c.execute('''CREATE TABLE articles (article_name text, datetime integer, article_content text)''')
-
-# #insert intitial values into database
+#insert intitial values into database table
 c.execute("INSERT INTO articles VALUES('first article', 1537392583, 'lorem ipsum dolor sit amet')")
 conn.commit()
 
